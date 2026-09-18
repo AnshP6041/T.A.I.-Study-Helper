@@ -1,4 +1,4 @@
-package main.java.com.ansh.tai.domain.entity;
+package com.ansh.tai.domain.entity;
 
 import jakarta.persistence.*;
 

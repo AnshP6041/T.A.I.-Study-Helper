@@ -1,4 +1,4 @@
-package main.java.com.ansh.tai.domain;
+package com.ansh.tai.domain;
 
 public record CreateCourseRequest(
         String title,

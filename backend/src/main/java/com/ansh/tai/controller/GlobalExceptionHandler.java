@@ -1,6 +1,6 @@
-package main.java.com.ansh.tai.controller;
+package com.ansh.tai.controller;
 
-import main.java.com.ansh.tai.domain.dto.ErrorDto;
+import com.ansh.tai.domain.dto.ErrorDto;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

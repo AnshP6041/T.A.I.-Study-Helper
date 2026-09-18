@@ -1,6 +1,9 @@
 import React from 'react';
 import {useNavigate} from "react-router";
-import {UserAuth} from "../context/AuthContext.jsx";
+import {UserAuth} from "@/context/AuthContext.jsx";
+import CourseDash from "@/components/course-management"
+import { LogOut } from "lucide-react";
+import {DashboardProvider} from "@/providers/course-provider"
 
 const CourseDashboard = () => {
     const { session, logout } = UserAuth();
@@ -17,14 +20,16 @@ const CourseDashboard = () => {
         }
     };
     return (
-        <div>
-            <p
-                onClick={handleSignOut}
-                className="hover:cursor-pointer  border inline-block px-4 py-3 mt-4 "
-            >
-                Sign out
-            </p>
-        </div>
+        <DashboardProvider>
+            <div className="bg-blue-50 min-h-screen">
+                <div>
+                    <p onClick={handleSignOut} className="hover:cursor-pointer hover:opacity-50 inline-block px-4 py-3 mt-4">
+                        <LogOut color="#fb2c36"/>
+                    </p>
+                </div>
+                <CourseDash/>
+            </div>
+        </DashboardProvider>
     );
 };
 

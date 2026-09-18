@@ -1,10 +1,14 @@
-package main.java.com.ansh.tai.service;
+package com.ansh.tai.service;
 
-import main.java.com.ansh.tai.domain.CreateCourseRequest;
-import main.java.com.ansh.tai.domain.entity.Course;
+import com.ansh.tai.domain.CreateCourseRequest;
+import com.ansh.tai.domain.entity.Course;
+
+import java.util.List;
 
 public interface CourseService {
 
     Course createCourse(CreateCourseRequest req);
+
+    List<Course> listCourses();
 
 }

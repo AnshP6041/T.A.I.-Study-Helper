@@ -1,6 +1,6 @@
-package main.java.com.ansh.tai.repository;
+package com.ansh.tai.repository;
 
-import main.java.com.ansh.tai.domain.entity.Course;
+import com.ansh.tai.domain.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

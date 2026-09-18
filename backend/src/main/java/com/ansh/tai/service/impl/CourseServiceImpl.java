@@ -1,10 +1,14 @@
-package main.java.com.ansh.tai.service.impl;
+package com.ansh.tai.service.impl;
 
-import main.java.com.ansh.tai.domain.CreateCourseRequest;
-import main.java.com.ansh.tai.domain.entity.Course;
-import main.java.com.ansh.tai.repository.CourseRepository;
-import main.java.com.ansh.tai.service.CourseService;
+import com.ansh.tai.domain.CreateCourseRequest;
+import com.ansh.tai.domain.entity.Course;
+import com.ansh.tai.repository.CourseRepository;
+import com.ansh.tai.service.CourseService;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -24,5 +28,10 @@ public class CourseServiceImpl implements CourseService {
         );
 
         return repo.save(course);
+    }
+
+    @Override
+    public List<Course> listCourses() {
+        return repo.findAll(Sort.by(Direction.ASC, "title"));
     }
 }

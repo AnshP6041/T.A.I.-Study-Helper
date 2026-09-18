@@ -1,4 +1,4 @@
-package main.java.com.ansh.tai.domain.dto;
+package com.ansh.tai.domain.dto;
 
 
 import jakarta.validation.constraints.NotBlank;

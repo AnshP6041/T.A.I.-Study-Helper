@@ -1,18 +1,17 @@
-package main.java.com.ansh.tai.controller;
+package com.ansh.tai.controller;
 
 import jakarta.validation.Valid;
-import main.java.com.ansh.tai.domain.CreateCourseRequest;
-import main.java.com.ansh.tai.domain.dto.CourseDto;
-import main.java.com.ansh.tai.domain.dto.CreateCourseRequestDto;
-import main.java.com.ansh.tai.domain.entity.Course;
-import main.java.com.ansh.tai.mapper.CourseMapper;
-import main.java.com.ansh.tai.service.CourseService;
+import com.ansh.tai.domain.CreateCourseRequest;
+import com.ansh.tai.domain.dto.CourseDto;
+import com.ansh.tai.domain.dto.CreateCourseRequestDto;
+import com.ansh.tai.domain.entity.Course;
+import com.ansh.tai.mapper.CourseMapper;
+import com.ansh.tai.service.CourseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/v1/courses")
@@ -34,6 +33,13 @@ public class CourseController {
         Course course = serve.createCourse(req);
         CourseDto dto = map.toDto(course);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CourseDto>> listCourses() {
+        List<Course> courses = serve.listCourses();
+        List<CourseDto> courseDtos = courses.stream().map(map::toDto).toList();
+        return ResponseEntity.ok(courseDtos);
     }
 
 }

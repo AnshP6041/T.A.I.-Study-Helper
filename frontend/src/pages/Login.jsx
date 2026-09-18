@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {UserAuth} from "../context/AuthContext.jsx";
+import {UserAuth} from "@/context/AuthContext.jsx";
 import {Link, useNavigate} from "react-router";
 import tai from "../assets/tai.png"
 

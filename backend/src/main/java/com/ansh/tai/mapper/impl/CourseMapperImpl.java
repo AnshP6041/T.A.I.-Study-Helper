@@ -1,10 +1,10 @@
-package main.java.com.ansh.tai.mapper.impl;
+package com.ansh.tai.mapper.impl;
 
-import main.java.com.ansh.tai.domain.CreateCourseRequest;
-import main.java.com.ansh.tai.domain.dto.CourseDto;
-import main.java.com.ansh.tai.domain.dto.CreateCourseRequestDto;
-import main.java.com.ansh.tai.domain.entity.Course;
-import main.java.com.ansh.tai.mapper.CourseMapper;
+import com.ansh.tai.domain.CreateCourseRequest;
+import com.ansh.tai.domain.dto.CourseDto;
+import com.ansh.tai.domain.dto.CreateCourseRequestDto;
+import com.ansh.tai.domain.entity.Course;
+import com.ansh.tai.mapper.CourseMapper;
 import org.springframework.stereotype.Component;
 
 @Component
