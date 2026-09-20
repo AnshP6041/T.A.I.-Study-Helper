@@ -14,7 +14,7 @@ import { AlertCircleIcon, ChevronDownIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useCourses } from "@/providers/course-provider";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { SketchPicker } from 'react-color';
+import { HexColorPicker } from "react-colorful";
 
 
 const CreateCourseDialogue = ({
@@ -25,7 +25,7 @@ const CreateCourseDialogue = ({
   const [color, setColor] = useState("#ffffff");
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [errorMessage, setErrorMessage] = useState();
 
   const { createCourse } = useCourses();
 
@@ -63,7 +63,7 @@ const CreateCourseDialogue = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="sm:max-w-[425px] dark text-white">
+      <DialogContent className="sm:max-w-[425px] bg-black text-white">
         <DialogHeader>
           <DialogTitle>Create a New Course</DialogTitle>
         </DialogHeader>
@@ -107,9 +107,9 @@ const CreateCourseDialogue = ({
                   className="w-auto overflow-hidden p-0"
                   align="start"
                 >
-                  <SketchPicker
+                  <HexColorPicker
                     color={color}
-                    onChangeComplete={(col) => {setColor(col.hex)}}
+                    onChange={(col) => {setColor(col.hex)}}
                   />
                 </PopoverContent>
               </Popover>
@@ -122,11 +122,11 @@ const CreateCourseDialogue = ({
           </Button>
           <Button
             type="submit"
-            className="bg-sky-500 text-white hover:bg-sky-600"
+            className="bg-sky-600 text-white"
             disabled={!isInputValid()}
             onClick={handleCreateCourse}
           >
-            Create Course
+            Create
           </Button>
         </DialogFooter>
       </DialogContent>

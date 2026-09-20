@@ -1,12 +1,16 @@
 import {createContext, useContext, useState, useCallback, useEffect, ReactNode} from "react";
-import {createCourse as callCreateCourse, listCourses as callListCourses} from "@/lib/api.js";
+import {createCourse as callCreateCourse,
+    listCourses as callListCourses,
+    updateCourse as callUpdateCourse,
+    deleteCourse as callDeleteCourse} from "@/lib/api.js";
 
 const CourseContext = createContext(undefined);
 
-export function DashboardProvider({children}) {
+export function CourseProvider({children}) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState();
 
   const refresh = useCallback(
       async () => {
@@ -36,6 +40,48 @@ export function DashboardProvider({children}) {
       }, [refresh]
   );
 
+  const updateCourse = useCallback(
+      async (id, req) => {
+          try{
+              setError(undefined);
+              const newList = await callUpdateCourse(id, req);
+              await refresh();
+              if (selectedCourse && selectedCourse.id === id) {
+                  setSelectedCourse(newList);
+              }
+              return newList;
+          } catch (err) {
+              setError(err ? err.message : "Failed to update course");
+              throw err;
+          }
+      }, [refresh]
+  );
+
+  const deleteCourse = useCallback(
+      async (id) => {
+          try{
+              setError(undefined);
+              await callDeleteCourse(id);
+              await refresh();
+              setSelectedCourse(undefined);
+          } catch (err) {
+              setError(err ? err.message : "Failed to delete course");
+              throw err;
+          }
+      }, [refresh]
+  );
+
+  const selectCourse = useCallback(
+      (id) => {
+          if(id === undefined) {
+              setSelectedCourse(undefined);
+          }
+          else {
+              const course = courses.find((c) => c.id === id);
+              setSelectedCourse(course);
+          }
+      }, [courses]
+  );
 
   useEffect(() => {
       refresh();
@@ -46,7 +92,8 @@ export function DashboardProvider({children}) {
         value={{
             loading, error, courses,
             refresh,
-            createCourse
+            createCourse, updateCourse, deleteCourse,
+            selectCourse, selectedCourse
         }}>
           {children}
       </CourseContext.Provider>

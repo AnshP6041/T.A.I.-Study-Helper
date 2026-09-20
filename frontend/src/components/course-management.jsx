@@ -3,12 +3,16 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { PlusCircle } from "lucide-react";
 import CreateCourseDialogue from "./course-create-dialog";
+import UpdateCourseDialogue from "./course-edit-dialog";
+import DeleteCourseDialogue from "./course-delete-dialog"
 import CourseCard from "./course-card";
 
 function CourseDash() {
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const [isUpdateCourseOpen, setIsUpdateCourseOpen] = useState(false);
+  const [isDeleteCourseOpen, setIsDeleteCourseOpen] = useState(false);
 
-  const { courses } = useCourses();
+  const { courses, selectedCourse, selectCourse } = useCourses();
 
   return (
     <div>
@@ -34,6 +38,14 @@ function CourseDash() {
             <CourseCard
               course={course}
               key={course.id}
+              editCourse={(course) => {
+                selectCourse(course.id);
+                setIsUpdateCourseOpen(true);
+              }}
+              deleteCourse={(course) => {
+                selectCourse(course.id);
+                setIsDeleteCourseOpen(true);
+              }}
             />
           ))) : (
               <p className="mt-10 text-center w-full font-bold">No Courses Created Yet</p>
@@ -48,6 +60,26 @@ function CourseDash() {
         isOpen={isCreateCourseOpen}
         close={() => setIsCreateCourseOpen(false)}
       />
+      {selectedCourse && (
+          <UpdateCourseDialogue
+            isOpen={isUpdateCourseOpen}
+            close={() => {
+              setIsUpdateCourseOpen(false);
+              selectCourse(undefined);
+            }}
+            course={selectedCourse}
+          />
+      )}
+      {selectedCourse && (
+          <DeleteCourseDialogue
+            isOpen={isDeleteCourseOpen}
+            close={() => {
+              setIsDeleteCourseOpen(false);
+              selectCourse(undefined);
+            }}
+            course={selectedCourse}
+          />
+      )}
     </div>
   );
 }

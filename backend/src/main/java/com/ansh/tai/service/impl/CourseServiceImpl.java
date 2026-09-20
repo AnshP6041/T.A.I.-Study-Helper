@@ -1,7 +1,9 @@
 package com.ansh.tai.service.impl;
 
 import com.ansh.tai.domain.CreateCourseRequest;
+import com.ansh.tai.domain.UpdateCourseRequest;
 import com.ansh.tai.domain.entity.Course;
+import com.ansh.tai.exception.CourseNotFoundException;
 import com.ansh.tai.repository.CourseRepository;
 import com.ansh.tai.service.CourseService;
 import org.springframework.data.domain.Sort;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -33,5 +36,21 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Course> listCourses() {
         return repo.findAll(Sort.by(Direction.ASC, "title"));
+    }
+
+    @Override
+    public Course updateCourse(UUID courseId, UpdateCourseRequest req) {
+        Course course = repo.findById(courseId)
+                .orElseThrow(() -> new CourseNotFoundException(courseId));
+
+        course.setTitle(req.title());
+        course.setColor(req.color());
+
+        return repo.save(course);
+    }
+
+    @Override
+    public void deleteCourse(UUID courseId) {
+        repo.deleteById(courseId);
     }
 }
