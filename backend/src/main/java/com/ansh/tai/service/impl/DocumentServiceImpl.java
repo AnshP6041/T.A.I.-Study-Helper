@@ -7,7 +7,6 @@ import com.ansh.tai.exception.DocumentNotFoundException;
 import com.ansh.tai.repository.DocumentRepository;
 import com.ansh.tai.service.DocumentService;
 import com.ansh.tai.service.StorageService;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,9 +27,9 @@ public class DocumentServiceImpl implements DocumentService {
     public Document createDoc(CreateDocumentRequest req) {
         //create file validator and validate req.file()
         UUID documentId = UUID.randomUUID();
-        String s3key = "course/" + req.courseId() + "/documents/" + documentId + "/" + req.fileName();
-        s3Serve.upload(req.file(), s3key);
-        Document doc = new Document(documentId, req.courseId(), req.fileName(), req.fileType(), s3key, DocStatus.PROCESSING);
+        String s3Key = "course/" + req.courseId() + "/documents/" + documentId + "/" + req.fileName();
+        s3Serve.upload(req.file(), s3Key);
+        Document doc = new Document(documentId, req.courseId(), req.fileName(), req.fileType(), s3Key, DocStatus.PROCESSING);
         repo.save(doc);
         //process doc asynchronously, so frontend gets processing status, extracting text and whatnot then set status to ready or failed in method once done
 
@@ -38,8 +37,8 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<Document> listDocs() {
-        return repo.findAll(Sort.by(Sort.Direction.ASC, "title"));
+    public List<Document> listDocs(UUID courseId) {
+        return repo.findAllByCourseIdOrderByFileNameAsc(courseId);
     }
 
     @Override

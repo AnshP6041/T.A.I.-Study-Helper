@@ -12,7 +12,8 @@ const documentResponseDtoToDocument = (dto) => {
         courseId: dto.courseId,
         fileName: dto.fileName,
         fileType: dto.fileType,
-        status: dto.status
+        status: dto.status,
+        url: dto.url
     }
 }
 
@@ -106,30 +107,27 @@ export const deleteCourse = async(
 }
 
 export const createDocument = async (req) => {
-    const res = await fetch('api/v1/documents', {
+    const formData = new FormData();
+
+    formData.append("courseId", req.courseId);
+    formData.append("fileName", req.fileName);
+    formData.append("fileType", req.fileType);
+    formData.append("file", req.file);
+
+    const res = await fetch('/api/v1/documents', {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(req)
+        body: formData
     });
 
     if(!res.ok) {
-        let message;
-        try {
-            const errorRes = await res.json();
-            message = errorRes.error;
-        } catch {
-            message = `Request error, is backend running?: ${res.status} ${res.statusText}`
-        }
-        throw new Error(message);
+        throw new Error("Failed to create document");
     }
 
     return documentResponseDtoToDocument(await res.json());
 }
 
-export const listDocuments = async() => {
-    const res = await fetch("/api/v1/documents", {
+export const listDocuments = async(courseId) => {
+    const res = await fetch(`/api/v1/documents?courseId=${courseId}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

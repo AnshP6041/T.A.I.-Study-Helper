@@ -6,8 +6,8 @@ import com.ansh.tai.domain.dto.DocumentDto;
 import com.ansh.tai.domain.entity.Document;
 import com.ansh.tai.mapper.DocumentMapper;
 import com.ansh.tai.service.DocumentService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +26,9 @@ public class DocumentController {
         this.serve = serve;
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DocumentDto> createDocument(
-            @Valid @RequestBody CreateDocumentRequestDto reqDto
+            @ModelAttribute CreateDocumentRequestDto reqDto
     ) {
         CreateDocumentRequest req = map.fromDto(reqDto);
         Document doc = serve.createDoc(req);
@@ -37,8 +37,10 @@ public class DocumentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentDto>> listDocs() {
-        List<Document> docs = serve.listDocs();
+    public ResponseEntity<List<DocumentDto>> listDocs(
+            @RequestParam UUID courseId
+    ) {
+        List<Document> docs = serve.listDocs(courseId);
         List<DocumentDto> docDtos = docs.stream().map(map::toDto).toList();
         return ResponseEntity.ok(docDtos);
     }

@@ -24,6 +24,7 @@ public class Document {
     @Column(nullable = false)
     private String s3Key;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private DocStatus status;
 

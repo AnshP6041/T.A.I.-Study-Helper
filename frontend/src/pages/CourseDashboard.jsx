@@ -3,7 +3,7 @@ import {useNavigate} from "react-router";
 import {UserAuth} from "@/context/AuthContext.jsx";
 import CourseDash from "@/components/course-management"
 import { LogOut } from "lucide-react";
-import {CourseProvider} from "@/providers/course-provider"
+import { CourseProvider } from "@/providers/course-provider"
 
 const CourseDashboard = () => {
     const { session, logout } = UserAuth();

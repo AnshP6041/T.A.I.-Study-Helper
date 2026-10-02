@@ -9,7 +9,7 @@ public record DocumentDto(
         UUID courseId,
         String fileName,
         String fileType,
-        String s3Key,
-        DocStatus status
+        DocStatus status,
+        String url
 ) {
 }

@@ -3,12 +3,12 @@ import { useCourses } from "@/providers/course-provider";
 import { useParams } from "react-router"
 import NotFound from "./NotFound.jsx"
 import Loading from "./Loading.jsx"
+import DocManager from "@/components/doc-management"
+import { DocumentProvider } from "@/providers/document-provider"
 
 const Course = () => {
     const { courses, loading } = useCourses();
     const { courseId } = useParams();
-
-    console.log("Course rendered");
 
     if (loading) {
         return <Loading />;
@@ -16,17 +16,18 @@ const Course = () => {
 
     const course = courses.find((c) => c.id === courseId);
 
-    console.log("Found course:", course);
-
     if (!course) {
         return <NotFound />;
     }
 
     return (
-        <div>
-            <h1>Course {course.title}</h1>
-            <p>ID: {course.id}</p>
-        </div>
+        <DocumentProvider courseId={courseId}>
+            <div className="h-[100vh] w-full">
+                <div className="h-full w-1/2">
+                    <DocManager />
+                </div>
+            </div>
+        </DocumentProvider>
     );
 };
 

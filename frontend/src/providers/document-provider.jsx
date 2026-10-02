@@ -5,7 +5,7 @@ import {createDocument as callCreateDocument,
 
 const DocumentContext = createContext(undefined);
 
-export function DocumentProvider({children}) {
+export function DocumentProvider({children, courseId}) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [documents, setDocuments] = useState([]);
@@ -16,7 +16,7 @@ export function DocumentProvider({children}) {
             try {
                 setLoading(true);
                 setError(undefined);
-                setDocuments(await callListDocuments());
+                setDocuments(await callListDocuments(courseId));
             } catch (err) {
                 setError(err ? err.message : "Failed to fetch documents");
             } finally {
@@ -67,8 +67,10 @@ export function DocumentProvider({children}) {
     );
 
     useEffect(() => {
-        refresh();
-    }, [refresh]);
+        if (courseId) {
+            refresh();
+        }
+    }, [courseId, refresh]);
 
     return (
         <DocumentContext.Provider

@@ -10,7 +10,7 @@ public interface DocumentService {
 
     Document createDoc(CreateDocumentRequest req);
 
-    List<Document> listDocs();
+    List<Document> listDocs(UUID courseId);
 
     void deleteDoc(UUID docId);
 }
