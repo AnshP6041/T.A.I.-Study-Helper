@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public record CreateDocumentRequestDto(
-        @NotBlank(message = "Must have a connected course")
+        @NotNull(message = "Must have a connected course")
         UUID courseId,
         @NotBlank(message = "Name cannot be empty")
         @Length(min = 3, max = 100, message = "Name must be > 3 and < 100")

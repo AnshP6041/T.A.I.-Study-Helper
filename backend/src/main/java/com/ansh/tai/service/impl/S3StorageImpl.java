@@ -6,13 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 public class S3StorageImpl implements StorageService {
@@ -50,13 +49,24 @@ public class S3StorageImpl implements StorageService {
     }
 
     @Override
-    public void delete(String s3Key) {
-        DeleteObjectRequest req = DeleteObjectRequest.builder()
+    public void delete(String prefix) {
+        ListObjectsV2Request listReq = ListObjectsV2Request.builder()
                 .bucket(bucket)
-                .key(s3Key)
+                .prefix(prefix)
                 .build();
 
-        s3Client.deleteObject(req);
+        for (ListObjectsV2Response page : s3Client.listObjectsV2Paginator(listReq)) {
+            if (page.contents().isEmpty()) continue;
+
+            List<ObjectIdentifier> keys = page.contents().stream()
+                    .map(o -> ObjectIdentifier.builder().key(o.key()).build())
+                    .toList();
+
+            s3Client.deleteObjects(DeleteObjectsRequest.builder()
+                    .bucket(bucket)
+                    .delete(Delete.builder().objects(keys).build())
+                    .build());
+        }
     }
 
     @Override
@@ -77,5 +87,20 @@ public class S3StorageImpl implements StorageService {
                 .presignGetObject(presignRequest)
                 .url()
                 .toString();
+    }
+
+    @Override
+    public byte[] download(String s3Key) {
+        return s3Client.getObjectAsBytes(b -> b.bucket(bucket).key(s3Key)).asByteArray();
+    }
+
+    @Override
+    public void upload(byte[] bytes, String contentType, String s3Key) {
+        PutObjectRequest req = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(s3Key)
+                .contentType(contentType)
+                .build();
+        s3Client.putObject(req, RequestBody.fromBytes(bytes));
     }
 }

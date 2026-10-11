@@ -23,6 +23,7 @@ public class DocumentMapperImpl implements DocumentMapper {
 
     @Override
     public DocumentDto toDto(Document doc) {
-        return new DocumentDto(doc.getId(), doc.getCourseId(), doc.getFileName(), doc.getFileType(), doc.getStatus(), s3Serve.generatePresignedUrl(doc.getS3Key()));
+        String previewUrl = doc.getPreviewS3Key() == null ? null : s3Serve.generatePresignedUrl(doc.getPreviewS3Key());
+        return new DocumentDto(doc.getId(), doc.getCourseId(), doc.getFileName(), doc.getFileType(), doc.getStatus(), s3Serve.generatePresignedUrl(doc.getS3Key()), previewUrl, doc.getDuplicateOfId());
     }
 }

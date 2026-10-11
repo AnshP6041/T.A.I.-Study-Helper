@@ -10,6 +10,8 @@ public record DocumentDto(
         String fileName,
         String fileType,
         DocStatus status,
-        String url
+        String url,
+        String previewUrl,
+        UUID duplicateOfId
 ) {
 }

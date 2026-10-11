@@ -28,16 +28,26 @@ public class Document {
     @Column(name = "status", nullable = false)
     private DocStatus status;
 
+    @Column(name = "preview_s3_key")
+    private String previewS3Key;
+
+    @Column(name = "content_hash")
+    private String contentHash;
+
+    @Column(name = "duplicate_of_id")
+    private UUID duplicateOfId;
+
     public Document() {
     }
 
-    public Document(UUID id, UUID courseId, String fileName, String fileType, String s3Key, DocStatus status) {
+    public Document(UUID id, UUID courseId, String fileName, String fileType, String s3Key, DocStatus status, String previewS3Key) {
         this.id = id;
         this.courseId = courseId;
         this.fileName = fileName;
         this.fileType = fileType;
         this.s3Key = s3Key;
         this.status = status;
+        this.previewS3Key = previewS3Key;
     }
 
     public UUID getId() {
@@ -88,6 +98,30 @@ public class Document {
         this.status = status;
     }
 
+    public String getPreviewS3Key() {
+        return previewS3Key;
+    }
+
+    public void setPreviewS3Key(String previewS3Key) {
+        this.previewS3Key = previewS3Key;
+    }
+
+    public String getContentHash() {
+        return contentHash;
+    }
+
+    public void setContentHash(String contentHash) {
+        this.contentHash = contentHash;
+    }
+
+    public UUID getDuplicateOfId() {
+        return duplicateOfId;
+    }
+
+    public void setDuplicateOfId(UUID duplicateOfId) {
+        this.duplicateOfId = duplicateOfId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -109,6 +143,7 @@ public class Document {
                 ", fileType='" + fileType + '\'' +
                 ", s3Key='" + s3Key + '\'' +
                 ", status=" + status +
+                ", previewS3Key='" + previewS3Key + '\'' +
                 '}';
     }
 }

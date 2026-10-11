@@ -6,6 +6,7 @@ import { useParams } from "react-router";
 export default function DocManagement() {
     const viewerRef = useRef(null);
     const uploadingRef = useRef(false);
+    const pendingOpenRef = useRef(new Set());
     const { courseId } = useParams();
 
     const loadAllDocs = async () => {
@@ -14,7 +15,7 @@ export default function DocManagement() {
         }
     };
     const unloadAllDocs = async () => {
-        for (const doc of documents) {
+        for (const doc of [...inTabDocuments]) {
             await closeTab(doc.id);
         }
     };
@@ -30,12 +31,20 @@ export default function DocManagement() {
         loading,
         error,
         deleteDocument,
-        createDocument
+        createDocument,
+        reprocessDocument
     } = useDocuments();
 
 
     const [inTabDocuments, setInTabDocuments] = useState([]);
     const [showDocumentPicker, setShowDocumentPicker] = useState(false);
+    const [err, setErr] = useState();
+
+    useEffect(() => {
+        if (!err) return;
+        const timer = setTimeout(() => setErr(undefined), 5000);
+        return () => clearTimeout(timer);
+    }, [err]);
 
     const getDocumentManager = async () => {
         const registry = await viewerRef.current?.registry;
@@ -53,17 +62,18 @@ export default function DocManagement() {
         }
         const input = document.createElement("input");
         input.type = "file";
-        input.accept = "application/pdf";
+        input.accept = ".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
         input.onchange = async (event) => {
             const file = event.target.files?.[0];
             if (!file) return;
 
-            const existing = documents.find(
-                (d) => d.fileName === file.name
-            );
+            const baseName = (name) => name.trim().replace(/\.(pdf|pptx)$/i, "").trim().toLowerCase();
+
+            const existing = documents.find((d) => baseName(d.fileName) === baseName(file.name));
             if (existing) {
                 await addDocToTab(existing);
+                setErr(`"${existing.fileName}" is already uploaded, so it was opened instead.`);
                 return;
             }
             uploadingRef.current = true;
@@ -75,8 +85,12 @@ export default function DocManagement() {
                     file: file
                 });
                 await addDocToTab(createdDoc);
-            } catch (error) {
-                console.error("Failed to create document:", error);
+            } catch (e) {
+                if (e.existingDocumentId) {
+                    const existing = documents.find((d) => d.id === e.existingDocumentId);
+                    if (existing) await addDocToTab(existing);
+                }
+                setErr(e.message || "Failed to create document");
             } finally {
                 uploadingRef.current = false;
             }
@@ -165,40 +179,63 @@ export default function DocManagement() {
         }
     };
 
+    const handleRetry = async (docId) => {
+        try {
+            await reprocessDocument(docId);
+        } catch (e) {
+            setErr(e.message);
+        }
+    };
+
     const addDocToTab = async (doc) => {
         const docMan = await getDocumentManager();
-
         if(!docMan) return;
 
-        if(inTabDocuments.some((d) => d.id === doc.id)){
-            await docMan.setActiveDocument(
-                doc.id
-            );
-
+        if (inTabDocuments.some((d) => d.id === doc.id)) {
+            await docMan.setActiveDocument(doc.id);
             selectDocument(doc.id);
             setShowDocumentPicker(false);
-
+            return;
+        }
+        if (!doc.previewUrl) {
+            pendingOpenRef.current.add(doc.id);
+            setErr("This presentation is still being converted. It will open once converted.");
             return;
         }
 
         await docMan.openDocumentUrl({
-            url: doc.url,
+            url: doc.previewUrl,
             documentId: doc.id,
             autoActivate: true,
         });
-        setInTabDocuments(
-            (current) => [...current, doc]
-        );
-
+        setInTabDocuments((current) => [...current, doc]);
         selectDocument(doc.id);
         setShowDocumentPicker(false);
     };
+
+    useEffect(() => {
+        for (const id of [...pendingOpenRef.current]) {
+            const doc = documents.find((d) => d.id === id);
+
+            if (!doc) {
+                pendingOpenRef.current.delete(id);
+            } else if (doc.previewUrl) {
+                pendingOpenRef.current.delete(id);
+                addDocToTab(doc);
+            } else if (doc.status === "FAILED") {
+                pendingOpenRef.current.delete(id);
+                setErr(`Couldn't convert "${doc.fileName}". Try uploading it again.`);
+            }
+        }
+    }, [documents]);
 
     const closeTab = async(docId) => {
         const docMan = await getDocumentManager();
 
         if(!docMan) return;
 
+        const doc = inTabDocuments.find((d) => d.id === docId);
+        if (!doc) return;
         await docMan.closeDocument(docId);
 
         setInTabDocuments((current) =>
@@ -229,8 +266,8 @@ export default function DocManagement() {
         const docMan = await getDocumentManager();
         if(!docMan) return;
 
+        const doc = inTabDocuments.find((d) => d.id === docId);
         await docMan.setActiveDocument(docId);
-
         selectDocument(docId);
     };
 
@@ -243,7 +280,6 @@ export default function DocManagement() {
             await closeTab(docId);
     };
 
-
     return (
         <div className="relative h-full w-full flex flex-col">
             <div className="h-12 shrink-0 border-b flex items-stretch">
@@ -251,6 +287,7 @@ export default function DocManagement() {
                     {inTabDocuments.map((doc) => (
                         <div
                             key={doc.id}
+                            title={doc.fileName}
                             className={`flex items-center gap-2 px-4 border-r cursor-pointer shrink-0 ${selectedDocument?.id === doc.id ? "bg-gray-100" : "bg-white"}`}
                             onClick={() =>
                                 changeActiveTab(doc.id)
@@ -279,6 +316,17 @@ export default function DocManagement() {
                     {showDocumentPicker ? '-' : '+'}
                 </button>
             </div>
+            {err && (
+                <div className="absolute top-14 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 shadow">
+                    <span>{err}</span>
+                    <button
+                        type="button"
+                        onClick={() => setErr(undefined)}
+                        className="text-red-400 hover:text-red-700">
+                        ×
+                    </button>
+                </div>
+            )}
             {showDocumentPicker && (
                 <div className="absolute top-12 right-0 z-50 w-80 border rounded-lg bg-white shadow-lg">
                     <div className="p-3 font-semibold border-b">
@@ -322,12 +370,26 @@ export default function DocManagement() {
                                         <div>
                                             {doc.fileName}
                                         </div>
+                                        <div className="flex flex-row gap-2">
+                                        {doc.status === "PROCESSING" && <span className="text-xs text-gray-500">Processing…</span>}
+                                        {doc.status === "FAILED" && <span className="text-xs text-red-500">Failed</span>}
+                                        {doc.status === "READY" && <span className="text-xs text-blue-500">Ready for AI</span>}
+                                        {doc.status === "DUPLICATE" && (<span className="text-xs text-amber-600">Duplicate of {documents.find((d) => d.id === doc.duplicateOfId)?.fileName ?? "another file"}</span>)}
                                         {isInTab && (
                                             <div className="text-xs text-gray-500">
                                                 - In Tab
                                             </div>
                                         )}
+                                        </div>
                                     </button>
+                                    {(doc.status === "FAILED" || (!doc.previewUrl && doc.status !== "PROCESSING")) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRetry(doc.id)}
+                                            className="px-3 py-3 text-blue-600 hover:bg-blue-50">
+                                            Retry
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -344,7 +406,6 @@ export default function DocManagement() {
                 </div>
             )}
             <div className="relative flex-1 min-h-0">
-
                 <PDFViewer
                     ref={viewerRef}
                     onReady={setupCustomOpenFile}

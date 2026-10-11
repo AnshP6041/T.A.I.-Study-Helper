@@ -30,7 +30,6 @@ const CreateCourseDialogue = ({
   const { createCourse } = useCourses();
 
   useEffect(() => {
-    // Reset state
     setTitle("");
     setColor("#ffffff")
   }, [isOpen]);

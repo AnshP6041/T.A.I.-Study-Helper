@@ -16,7 +16,7 @@ const CourseDashboard = () => {
             await logout();
             navigate("/");
         } catch (err) {
-            console.error("An unexpected error occurred."); // Catch unexpected errors
+            console.error("An unexpected error occurred.");
         }
     };
     return (

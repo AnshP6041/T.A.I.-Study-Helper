@@ -13,7 +13,9 @@ const documentResponseDtoToDocument = (dto) => {
         fileName: dto.fileName,
         fileType: dto.fileType,
         status: dto.status,
-        url: dto.url
+        url: dto.url,
+        previewUrl: dto.previewUrl,
+        duplicateOfId: dto.duplicateOfId
     }
 }
 
@@ -120,11 +122,25 @@ export const createDocument = async (req) => {
     });
 
     if(!res.ok) {
-        throw new Error("Failed to create document");
+        let body = {};
+        try { body = await res.json(); } catch { /* not json */ }
+        const err = new Error(body.error || `Upload failed: ${res.status} ${res.statusText}`);
+        err.existingDocumentId = body.existingDocumentId;
+        throw err;
     }
 
     return documentResponseDtoToDocument(await res.json());
 }
+
+export const reprocessDocument = async (id) => {
+    const res = await fetch(`/api/v1/documents/${id}/reprocess`, { method: "POST" });
+    if (!res.ok) {
+        let body = {};
+        try { body = await res.json(); } catch { /* not json */ }
+        throw new Error(body.error || `Retry failed: ${res.status} ${res.statusText}`);
+    }
+    return documentResponseDtoToDocument(await res.json());
+};
 
 export const listDocuments = async(courseId) => {
     const res = await fetch(`/api/v1/documents?courseId=${courseId}`, {

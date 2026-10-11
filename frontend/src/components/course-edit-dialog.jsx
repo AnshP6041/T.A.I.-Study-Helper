@@ -27,7 +27,6 @@ const UpdateCourseDialogue = ({course, isOpen, close}) => {
     const { updateCourse } = useCourses();
 
     useEffect(() => {
-        // Reset state
         setTitle(course.title);
         setColor(course.color)
     }, [isOpen]);
